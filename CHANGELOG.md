@@ -1,5 +1,5 @@
-4.0.3 (November 25, 2026)
-------------------------------
+### 4.0.3 (November 25, 2026)
+
 #### Changes and improvements:
 - `FlxRuntimeShader`: `setFloat`, `setInt` and `setBool` reuse the parameter array instead of allocating one per call
 - `FlxRuntimeShader`: added `hasParameter`, `setVec2`, `setVec3`, `setVec4`, `setColor` and `warnOnMissingParameters`
