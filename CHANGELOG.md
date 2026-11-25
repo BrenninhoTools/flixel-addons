@@ -1,3 +1,14 @@
+4.0.3 (November 25, 2026)
+------------------------------
+#### Changes and improvements:
+- `FlxRuntimeShader`: `setFloat`, `setInt` and `setBool` reuse the parameter array instead of allocating one per call
+- `FlxRuntimeShader`: added `hasParameter`, `setVec2`, `setVec3`, `setVec4`, `setColor` and `warnOnMissingParameters`
+- `FlxScreenGrab`: saves the PNG as binary and supports the static `lime.ui.FileDialog.saveFile` API
+
+#### Bugfixes:
+- `FlxWeapon` and `FlxControlHandler`: timers are `Float`, so they compile where `FlxG.game.ticks` is a `Float`
+- `FlxScreenGrab`: compiles with Lime builds that removed `FileDialogType`
+
 ### 4.0.2 (August 16, 2026)
 - `FlxWaveEffect`: Remove refs to FlxMath.fastSin and cos ([#486](https://github.com/HaxeFlixel/flixel-addons/pull/486))
 - `FlxTypeText`: Fix FlxSound deprecation warnings ([#478](https://github.com/HaxeFlixel/flixel-addons/pull/478))

@@ -10,8 +10,6 @@ import flixel.addons.util.PNGEncoder;
 import flixel.FlxG;
 import flixel.input.keyboard.FlxKey;
 #if sys
-import lime.ui.FileDialog;
-import lime.ui.FileDialogType;
 import openfl.display.PNGEncoderOptions;
 #else
 import openfl.net.FileReference;
@@ -181,34 +179,21 @@ class FlxScreenGrab extends FlxBasic
 		documentsDirectory = lime.system.System.documentsDirectory;
 		#end
 
-		var fd:FileDialog = new FileDialog();
-
-		var path = "";
-
-		fd.onSelect.add(function(str:String)
+		var write = function(selected:String)
 		{
-			path = fixFilename(str);
-			var f = sys.io.File.write(path, true);
-			f.writeString(png.readUTFBytes(png.length));
-			f.close();
-			path = null;
-		});
+			if (selected == null || selected == "")
+				return;
+			png.position = 0;
+			sys.io.File.saveBytes(fixFilename(selected), png);
+		};
 
 		try
 		{
-			fd.browse(FileDialogType.SAVE, "*.png", documentsDirectory);
+			FileDialogCompat.browseSave(write, documentsDirectory);
 		}
-		catch (msg:String)
+		catch (msg:Dynamic)
 		{
-			path = Filename; // if there was an error write out to default directory (game install directory)
-		}
-
-		if (path != "" && path != null) // if path is empty, the user cancelled the save operation and we can safely do nothing
-		{
-			path = fixFilename(path);
-			var f = sys.io.File.write(path, true);
-			f.writeString(png.readUTFBytes(png.length));
-			f.close();
+			write(Filename);
 		}
 		#end
 	}

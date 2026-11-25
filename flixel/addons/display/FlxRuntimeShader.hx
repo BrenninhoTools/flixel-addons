@@ -7,6 +7,7 @@ package flixel.addons.display;
 #else
 import flixel.addons.system.macros.FlxRuntimeShaderMacro;
 import flixel.graphics.tile.FlxGraphicsShader;
+import flixel.util.FlxColor;
 import flixel.util.FlxStringUtil;
 #if lime
 import lime.utils.Float32Array;
@@ -37,6 +38,8 @@ class FlxRuntimeShader extends FlxGraphicsShader
 	 * @param fragmentSource The fragment shader source.
 	 * @param vertexSource The vertex shader source.
 	 */
+	public static var warnOnMissingParameters:Bool = true;
+
 	public function new(?fragmentSource:String, ?vertexSource:String):Void
 	{
 		if (fragmentSource != null && fragmentSource.length > 0)
@@ -64,11 +67,14 @@ class FlxRuntimeShader extends FlxGraphicsShader
 
 		if (shaderParameter == null)
 		{
-			FlxG.log.warn('Shader float parameter "$name" not found.');
+			missing('float', name);
 			return;
 		}
 
-		shaderParameter.value = [value];
+		if (shaderParameter.value != null && shaderParameter.value.length == 1)
+			shaderParameter.value[0] = value;
+		else
+			shaderParameter.value = [value];
 	}
 
 	/**
@@ -82,7 +88,7 @@ class FlxRuntimeShader extends FlxGraphicsShader
 
 		if (shaderParameter == null)
 		{
-			FlxG.log.warn('Shader float parameter "$name" not found.');
+			missing('float', name);
 			return null;
 		}
 
@@ -138,11 +144,14 @@ class FlxRuntimeShader extends FlxGraphicsShader
 
 		if (shaderParameter == null)
 		{
-			FlxG.log.warn('Shader int parameter "$name" not found.');
+			missing('int', name);
 			return;
 		}
 
-		shaderParameter.value = [value];
+		if (shaderParameter.value != null && shaderParameter.value.length == 1)
+			shaderParameter.value[0] = value;
+		else
+			shaderParameter.value = [value];
 	}
 
 	/**
@@ -156,7 +165,7 @@ class FlxRuntimeShader extends FlxGraphicsShader
 
 		if (shaderParameter == null)
 		{
-			FlxG.log.warn('Shader int parameter "$name" not found.');
+			missing('int', name);
 			return null;
 		}
 
@@ -212,11 +221,14 @@ class FlxRuntimeShader extends FlxGraphicsShader
 
 		if (shaderParameter == null)
 		{
-			FlxG.log.warn('Shader bool parameter "$name" not found.');
+			missing('bool', name);
 			return;
 		}
 
-		shaderParameter.value = [value];
+		if (shaderParameter.value != null && shaderParameter.value.length == 1)
+			shaderParameter.value[0] = value;
+		else
+			shaderParameter.value = [value];
 	}
 
 	/**
@@ -230,7 +242,7 @@ class FlxRuntimeShader extends FlxGraphicsShader
 
 		if (shaderParameter == null)
 		{
-			FlxG.log.warn('Shader bool parameter "$name" not found.');
+			missing('bool', name);
 			return null;
 		}
 
@@ -315,6 +327,60 @@ class FlxRuntimeShader extends FlxGraphicsShader
 	/**
 	 * Convert the shader to a readable string name. Useful for debugging.
 	 */
+	public function hasParameter(name:String):Bool
+	{
+		return data != null && Reflect.field(data, name) != null;
+	}
+
+	public function setVec2(name:String, x:Float, y:Float):Void
+	{
+		setVector(name, [x, y]);
+	}
+
+	public function setVec3(name:String, x:Float, y:Float, z:Float):Void
+	{
+		setVector(name, [x, y, z]);
+	}
+
+	public function setVec4(name:String, x:Float, y:Float, z:Float, w:Float):Void
+	{
+		setVector(name, [x, y, z, w]);
+	}
+
+	public function setColor(name:String, color:FlxColor, includeAlpha:Bool = false):Void
+	{
+		if (includeAlpha)
+			setVector(name, [color.redFloat, color.greenFloat, color.blueFloat, color.alphaFloat]);
+		else
+			setVector(name, [color.redFloat, color.greenFloat, color.blueFloat]);
+	}
+
+	function setVector(name:String, values:Array<Float>):Void
+	{
+		final shaderParameter:ShaderParameter<Float> = Reflect.field(data, name);
+
+		if (shaderParameter == null)
+		{
+			missing('vector', name);
+			return;
+		}
+
+		final current = shaderParameter.value;
+		if (current != null && current.length == values.length)
+		{
+			for (i in 0...values.length)
+				current[i] = values[i];
+		}
+		else
+			shaderParameter.value = values;
+	}
+
+	function missing(kind:String, name:String):Void
+	{
+		if (warnOnMissingParameters)
+			FlxG.log.warn('Shader $kind parameter "$name" not found.');
+	}
+
 	public function toString():String
 	{
 		return FlxStringUtil.getDebugString([for (field in Reflect.fields(data)) LabelValuePair.weak(field, Reflect.field(data, field))]);
